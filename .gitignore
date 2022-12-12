@@ -1,2 +1,5 @@
 env
 LogoDet-3K
+data/annotations
+data/labels
+data/images
