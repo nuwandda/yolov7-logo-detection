@@ -27,6 +27,15 @@ def get_class_names(path):
     return classes
 
 
+def get_class_names_yaml(path):
+    classes = []
+    for folder in glob(path + '/*/', recursive = True):
+        for subfolder in glob(folder + '/*/', recursive = True):
+            classes.append(subfolder.split('/')[-2])
+
+    return classes
+
+
 def get_annotations(path):
     annotations = []
     for folder in glob(path + '/*/', recursive = True):
