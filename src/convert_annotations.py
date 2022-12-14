@@ -1,21 +1,15 @@
-import torch
 from IPython.display import Image  # for displaying images
 import os 
-import random
-import shutil
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
 from tqdm import tqdm
 from PIL import Image, ImageDraw
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 from glob import glob
+import argparse
 
-random.seed(0)
 
-
-def get_class_names(path):
+def get_class_names_logodet(path):
     classes = {}
     class_number = 0
     for folder in glob(path + '/*/', recursive = True):
@@ -27,7 +21,7 @@ def get_class_names(path):
     return classes
 
 
-def get_class_names_yaml(path):
+def get_class_names_yaml_logodet(path):
     classes = []
     for folder in glob(path + '/*/', recursive = True):
         for subfolder in glob(folder + '/*/', recursive = True):
@@ -36,7 +30,7 @@ def get_class_names_yaml(path):
     return classes
 
 
-def get_annotations(path):
+def get_annotations_logodet(path):
     annotations = []
     for folder in glob(path + '/*/', recursive = True):
         for subfolder in glob(folder + '/*/', recursive = True):
@@ -44,6 +38,57 @@ def get_annotations(path):
                 annotations.append(xml)
 
     return annotations
+
+
+def get_class_names(path):
+    classes = {}
+    class_number = -1
+    current_class = ''
+    with open(path) as f:
+        lines = f.readlines()
+        class_name = ''
+        for line in lines:
+            class_name = str(line.split(' ')[1])
+
+            if current_class != class_name:
+                class_number += 1
+            classes[class_name] = class_number
+            current_class = class_name
+
+    return classes
+
+
+def get_image_paths(path):
+    annotations = []
+    for image in glob(path + '/*.jpg'):
+        annotations.append(image)
+
+    return annotations
+
+
+def extract_info_from_annotations(line):
+    class_name = str(line.split(' ')[1])
+    xmin = int(line.split(' ')[3])
+    ymin = int(line.split(' ')[4])
+    xmax = int(line.split(' ')[5])
+    ymax = int(line.split(' ')[6])
+
+    return {'class': class_name, 'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax}
+
+
+def get_annotations(path, current_image_name, width, height):
+    with open(path) as f:
+        lines = f.readlines()
+        bboxes = []
+        for line in lines:
+            image_name = str(line.split(' ')[0].split('.')[0])
+
+            if current_image_name == image_name:
+                new_bbox = extract_info_from_annotations(line)
+                if new_bbox not in bboxes:
+                    bboxes.append(new_bbox)
+
+    return {'bboxes': bboxes, 'filename': str(current_image_name + '.jpg'), 'image_size': (width, height, 3)}
 
 
 def extract_info_from_xml(xml_file):
@@ -82,9 +127,8 @@ def extract_info_from_xml(xml_file):
     return info_dict
 
 
-
 # Convert the info dict to the required yolo format and write it to disk
-def convert_to_yolov5(info_dict, ann):
+def convert_to_yolov5(info_dict, ann, class_name_to_id_mapping):
     print_buffer = []
     
     # For each bounding box
@@ -121,7 +165,7 @@ def convert_to_yolov5(info_dict, ann):
     print("\n".join(print_buffer), file= open(save_file_name, "w"))
 
 
-def plot_bounding_box(image, annotation_list):
+def plot_bounding_box(image, annotation_list, class_id_to_name_mapping):
     annotations = np.array(annotation_list)
     w, h = image.size
     
@@ -146,32 +190,57 @@ def plot_bounding_box(image, annotation_list):
     plt.show()
 
 
-# Dictionary that maps class names to IDs
-class_name_to_id_mapping = get_class_names('data/LogoDet-3K')
-annotations = get_annotations('data/LogoDet-3K')
-class_id_to_name_mapping = dict(zip(class_name_to_id_mapping.values(), class_name_to_id_mapping.keys()))
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, required=True, help='flickr27 or logodet3k')
+    parser.add_argument('--plot', action='store_true', help='To plot converted bboxes')
+    parser.add_argument('--image', default='data/flickr_logos_27_dataset/flickr_logos_27_dataset_images/4771736332.txt', type=str, help='path to plot image')
+    opt = parser.parse_args()
 
-# Convert and save the annotations
-for ann in tqdm(annotations):
-    info_dict = extract_info_from_xml(ann)
-    convert_to_yolov5(info_dict, ann)
+    if opt.dataset == 'flickr27':
+        annotations_path = 'data/flickr_logos_27_dataset/flickr_logos_27_dataset_training_set_annotation.txt'
+        class_name_to_id_mapping = get_class_names(annotations_path)
+        class_id_to_name_mapping = dict(zip(class_name_to_id_mapping.values(), class_name_to_id_mapping.keys()))
+        image_paths = get_image_paths('data/flickr_logos_27_dataset/flickr_logos_27_dataset_images')
 
-# Get any random annotation file
-# To test the annotations please uncomment the lines below
-"""
-annotation_file = 'data/LogoDet-3K/Necessities/After Dinner/55.txt'
-with open(annotation_file, "r") as file:
-    annotation_list = file.read().split("\n")[:-1]
-    annotation_list = [x.split(" ") for x in annotation_list]
-    annotation_list = [[float(y) for y in x ] for x in annotation_list]
 
-# Get the corresponding image file
-image_file = annotation_file.replace("txt", "jpg")
-assert os.path.exists(image_file)
+        for image_path in tqdm(image_paths):
+            current_image = Image.open(image_path)
+            width, height = current_image.size
+            current_image_name = image_path.split('/')[-1].split('.')[0]
+            out = get_annotations(annotations_path, current_image_name, width, height)
+            convert_to_yolov5(out, image_path, class_name_to_id_mapping)
 
-#Load the image
-image = Image.open(image_file)
+    else:
+        # Dictionary that maps class names to IDs
+        class_name_to_id_mapping = get_class_names('data/LogoDet-3K')
+        annotations = get_annotations('data/LogoDet-3K')
+        class_id_to_name_mapping = dict(zip(class_name_to_id_mapping.values(), class_name_to_id_mapping.keys()))
 
-#Plot the Bounding Box
-plot_bounding_box(image, annotation_list)
-"""
+        # Convert and save the annotations
+        for ann in tqdm(annotations):
+            info_dict = extract_info_from_xml(ann)
+            convert_to_yolov5(info_dict, ann)
+
+    # Get any random annotation file
+    # To test the annotations please uncomment the lines below
+    if opt.plot:
+        annotation_file = opt.image
+        with open(annotation_file, "r") as file:
+            annotation_list = file.read().split("\n")[:-1]
+            annotation_list = [x.split(" ") for x in annotation_list]
+            annotation_list = [[float(y) for y in x ] for x in annotation_list]
+
+        # Get the corresponding image file
+        image_file = annotation_file.replace("txt", "jpg")
+        assert os.path.exists(image_file)
+
+        #Load the image
+        image = Image.open(image_file)
+
+        #Plot the Bounding Box
+        plot_bounding_box(image, annotation_list)
+
+
+if __name__ == "__main__":
+    main()
