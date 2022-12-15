@@ -128,11 +128,11 @@ Download the resulting model [here][6].
 
 Confusion Matrix:
 
-<img src="https://github.com/nuwandda/yolov7-logo/blob/main/images/confusion_matrix.png" width="100" height="100">
+<img src="https://github.com/nuwandda/yolov7-logo/blob/main/images/confusion_matrix.png" width="400" height="400">
 
 PR Curve:
 
-<img src="https://github.com/nuwandda/yolov7-logo/blob/main/images/PR_curve.png" width="100" height="100">
+<img src="https://github.com/nuwandda/yolov7-logo/blob/main/images/PR_curve.png" width="400" height="400">
 
 
 [1]: https://arxiv.org/pdf/2207.02696.pdf
