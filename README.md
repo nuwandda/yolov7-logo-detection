@@ -82,17 +82,17 @@ To install the required packages. In a terminal, type:
 ### Convert the annotations
 Now that we have our dataset, we need to convert the annotations into the format expected by YOLOv7. YOLOv7 expects data to be organized in a specific way, otherwise it is unable to parse through the directories.
   ```sh
-  python convert_annotations.py --dataset flickr27
+  python src/convert_annotations.py --dataset flickr27
   ```
 To see if the conversion is correct, run.
   ```sh
-  python convert_annotations.py --dataset flickr27 --plot
+  python src/convert_annotations.py --dataset flickr27 --plot
   ```
 
 ### Partition the Dataset
 Next, we need to partition the dataset into train, validation, and test sets. These will contain 80%, 10%, and 10% of the data, respectively.
   ```sh
-  python prepare_data.py --dataset flickr27
+  python src/prepare_data.py --dataset flickr27
   ```
 
 ### Training
