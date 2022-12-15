@@ -113,7 +113,9 @@ To start the training:
   python src/yolov7/train.py --img-size 640 --cfg src/cfg/training/yolov7.yaml --hyp data/hyp.scratch.yaml --batch 2 --epoch 300 --data data/logo_data_flickr.yaml --weights src/yolov7_training.pt --workers 2 --name yolo_logo_det --device 0
   ```
 
-You can use the **train.ipynb** file to train on Colab.
+You can also train the model on Google Colab.
+
+<a href="https://colab.research.google.com/github/nuwandda/yolov7-logo/blob/main/src/train.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
 
 ### Inference
 To test the training model:
