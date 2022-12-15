@@ -61,7 +61,7 @@ To download the dataset, run **getFlickr.sh**.
 It will be downloaded inside to **data** folder.
 
 ### Download base models
-In this project, there are three base models used. You can download them by visiting the links below.
+In this project, three are three base models used. You can download them by visiting the links below.
 
 * [yolov7_training.pt][4]
 * [yolov7-tiny.pt][5]
