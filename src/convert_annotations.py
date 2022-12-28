@@ -213,8 +213,8 @@ def main():
 
     else:
         # Dictionary that maps class names to IDs
-        class_name_to_id_mapping = get_class_names('data/LogoDet-3K')
-        annotations = get_annotations('data/LogoDet-3K')
+        class_name_to_id_mapping = get_class_names_logodet('data/LogoDet-3K')
+        annotations = get_annotations_logodet('data/LogoDet-3K')
         class_id_to_name_mapping = dict(zip(class_name_to_id_mapping.values(), class_name_to_id_mapping.keys()))
 
         # Convert and save the annotations

@@ -63,7 +63,7 @@ def main():
     if opt.dataset == 'flickr27':
         annotations, images = get_annotations_flickr('data/flickr_logos_27_dataset/flickr_logos_27_dataset_images')
     else:
-        annotations, images = get_annotations_flickr('data/LogoDet-3K')
+        annotations, images = get_annotations('data/LogoDet-3K')
 
     # Split the dataset into train-valid-test splits 
     train_images, val_images, train_annotations, val_annotations = train_test_split(images, annotations, test_size = 0.2, random_state = 1)
