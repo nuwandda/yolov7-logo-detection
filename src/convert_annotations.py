@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 import argparse
-
+import re
 
 def get_class_names_logodet(path):
     classes = {}
@@ -117,7 +117,7 @@ def extract_info_from_xml(xml_file):
             bbox = {}
             for subelem in elem:
                 if subelem.tag == "name":
-                    bbox["class"] = subelem.text
+                    bbox["class"] = re.split(r'-\d+', subelem.text)[0]
                     
                 elif subelem.tag == "bndbox":
                     for subsubelem in subelem:
