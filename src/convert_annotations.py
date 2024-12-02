@@ -220,7 +220,7 @@ def main():
         # Convert and save the annotations
         for ann in tqdm(annotations):
             info_dict = extract_info_from_xml(ann)
-            convert_to_yolov5(info_dict, ann)
+            convert_to_yolov5(info_dict, ann, class_name_to_id_mapping)
 
     # Get any random annotation file
     # To test the annotations please uncomment the lines below
@@ -239,7 +239,7 @@ def main():
         image = Image.open(image_file)
 
         #Plot the Bounding Box
-        plot_bounding_box(image, annotation_list)
+        plot_bounding_box(image, annotation_list, class_id_to_name_mapping)
 
 
 if __name__ == "__main__":
